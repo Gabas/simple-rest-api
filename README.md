@@ -6,8 +6,7 @@ It has /api route to handle get, post, put and delete request for storing simple
 ## Mongoose Schema
 ```javascript
 { 
-  First Name : string,
-  Second Name : string,
-  Phone number : number
+  name : string,
+  phoneNumber : number
 }
 ```
