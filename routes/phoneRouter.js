@@ -5,14 +5,16 @@ var jsonParser = require('body-parser').json();
 var errorHandler = require(__dirname + '/../lib/handlerError');
 
 phoneBookRouter.post('/person', jsonParser, function(req, res) {
-  var newPerson = new Person(req.body);
+  var newPerson = new Person();
+  newPerson.name = req.body.name;
+  newPerson.phoneNumber = req.body.phoneNumber;
   if(newPerson.name && newPerson.phoneNumber) {
     newPerson.save(function(err, data) {
       if (err) errorHandler(err, res);
       res.json(data);
     });
   } else {
-    res.send('Your input data is incorrect');
+    return errorHandler.standard('Input data is incorrect');
   }
 });
 
@@ -39,21 +41,20 @@ phoneBookRouter.put('/person/:id', jsonParser, function(req, res) {
       res.json({msg:'success'});
     });
   } else {
-    res.send('Your input data is incorrect');
+    return errorHandler.standard('Input data is incorrect');
   }
 });
 
 phoneBookRouter.delete('/person/:id', function(req, res) {
   Person.find({_id: req.params.id}, function(err, data) {
-    if (err) errorHandler(err, res);
-    console.log(data.length);
+    if (err) return errorHandler(err, res);
     if (data.length) {
       Person.remove({_id: req.params.id}, function(err) {
         if (err) errorHandler(err, res);
         res.json({msg:'success'});
       });
     } else {
-      res.json({msg:'This persone does not exist'});
+      res.json({msg:'This person does not exist'});
     }
   });
 });
