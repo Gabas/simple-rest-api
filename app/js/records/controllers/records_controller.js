@@ -1,17 +1,23 @@
 module.exports = function(phoneBook) {
 
-  phoneBook.controller('mainController', ['$scope', '$http', function($scope, $http) {
-
+  phoneBook.controller('mainController', 'Resource', ['$scope', '$http', function($scope, $http) {
+    var resource = Resource;
     $scope.book = [];
 
 
   $scope.getAll = function() {
-    $http.get('/api/person')
-    .then(function(res) {
-      $scope.book = res.data;
-    }, function(res) {
+        resource.getAll(function(res) {
+          $scope.book = res.data;
+        });
 
-    });
+
+
+    // $http.get('/api/person')
+    // .then(function(res) {
+    //   $scope.book = res.data;
+    // }, function(res) {
+
+    // });
   };
 
   $scope.create = function(record) {
