@@ -45,7 +45,14 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(1);
-	__webpack_require__(5);
+	__webpack_require__(11);
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(2);
+	__webpack_require__(10);
 
 	describe('phoneBook controller', function() {
 	  var $httpBackend;
@@ -106,31 +113,29 @@
 	      $scope.book = [];
 	      $scope.book.push(record);
 	      $scope.book.push({_id: 12345, name: 'John23', phoneNumber: 1234});
-
 	      $httpBackend.expectDELETE('/api/person/123').respond(200, {_id: 1, msg: 'deleted'});
 	      $scope.delete(record);
 	      $httpBackend.flush();
 	      expect($scope.book[0].name).toBe('John23');
 	    });
-
-
-
 	  });
 	});
 
 /***/ },
-/* 1 */
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(2);
+	__webpack_require__(3);
 	// require('./css/style.css');
 
 	var phoneBook = angular.module('phoneBookApp', []);
 
-	__webpack_require__(3)(phoneBook);
+	__webpack_require__(4)(phoneBook);
+	__webpack_require__(6)(phoneBook);
+	__webpack_require__(8)(phoneBook);
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
 	/**
@@ -28961,60 +28966,54 @@
 	!window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = function(app) {
-	  __webpack_require__(4)(app);
+	  __webpack_require__(5)(app);
 	};
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	module.exports = function(phoneBook) {
 
-	  phoneBook.controller('mainController', ['$scope', '$http', function($scope, $http) {
-
-	    $scope.book = [];
+	  phoneBook.controller('mainController', ['$scope', '$http', 'Resource', function($scope, $http, Resource) {
+	    
+	  $scope.book = [];
 
 
 	  $scope.getAll = function() {
-	    $http.get('/api/person')
-	    .then(function(res) {
+	    Resource.getAll(function(err, res) {
 	      $scope.book = res.data;
-	    }, function(res) {
-
 	    });
 	  };
 
 	  $scope.create = function(record) {
-	    $http.post('/api/person', record)
-	      .then(function(res) {
-	        $scope.book.push(record);
-	        $scope.newRecord = {};
-	        console.log(res);
-	      }, function(res) {
-	        $scope.newRecord = {};
-	      });
+	    $scope.book.push(record);
+	    $scope.newRecord = {};
+	    Resource.create(record, function(err, res) {
+	      if (err) {
+	        $scope.book.pop();
+	        return console.log(err);
+	      }
+	      record._id = res.data._id;
+	    });
 	  };
 
 	  $scope.delete = function(record) {
-	    $http.delete('/api/person/' + record._id)
-	      .then(function(res) {
-	        $scope.book.splice($scope.book.indexOf(record), 1);
-	      }, function(res) {
-
-	      });
+	    Resource.delete(record, function(err, res) {
+	      if (err) return console.log(err);
+	      $scope.book.splice($scope.book.indexOf(record), 1);
+	    });
 	  };
 
 	  $scope.update = function(record) {
-	    $http.put('/api/person/' + record._id, record)
-	      .then(function(res) {
-	        record.editing = false;
-	      }, function(res) {
-
-	      });
+	    Resource.update(record, function(err, res) {
+	      if (err) return console.log(err);
+	      record.editing = false;
+	    });
 	  };
 
 	  $scope.edit = function(record) {
@@ -29033,7 +29032,106 @@
 	};
 
 /***/ },
-/* 5 */
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function(app) {
+	  __webpack_require__(7)(app);
+	};
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	module.exports = function(app) {
+	  app.factory('Resource', ['$http', function($http) {
+	    
+	    var Resource = {};
+	    
+	    Resource.getAll = function(callback) {
+	      $http.get('/api/person')
+	        .then(handleSuccess(callback),
+	         handleError(callback));
+	    };
+
+	    Resource.create = function(data, callback) {
+	      $http.post('/api/person', data)
+	        .then(handleSuccess(callback),
+	         handleError(callback));
+	    };
+
+	    Resource.delete = function(data, callback) {
+	      $http.delete('/api/person/' + data._id)
+	        .then(handleSuccess(callback),
+	          handleError(callback));
+	    };
+
+	    Resource.update = function(data, callback) {
+	      $http.put('/api/person/' + data._id, data)
+	      .then(handleSuccess(callback),
+	          handleError(callback));
+	    };
+	    
+	    function handleSuccess(callback) {
+	      return function(res) {
+	        callback(null, res);
+	      };
+	    }
+
+	    function handleError(callback) {
+	      return function(res) {
+	        callback(res);
+	      };
+	    }
+	    
+	    return Resource;
+	  }]);
+	};
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function(app) {
+	  __webpack_require__(9)(app);
+	};
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	module.exports = function(app) {
+	  app.directive('arrayInfo', function() {
+	    return {
+	      restrict: 'AC',
+	      replace: true,
+	      templateUrl: '/templates/directives/array_info_template.html',
+	      scope: {
+	        array: '=',
+	        length: '='
+	      },
+	      controller: ['$scope', function($scope) {
+	        $scope.findAllFields = function(obj) {
+	          var fields = [];
+	          for (name in obj[0]) {
+	            fields.push(name);
+	          }
+	          $scope.fieldsString = fields.toString();
+	          $scope.length = obj.length;
+	        };
+	      }],
+	      link: function(scope, iElement, iAttrs, ctrl) {
+	        scope.$watch('array', function() {
+	          scope.findAllFields(scope.array);
+	          scope.length = scope.array.length;
+	        }, true);
+	      }
+	    };
+	  });
+	};
+
+/***/ },
+/* 10 */
 /***/ function(module, exports) {
 
 	/**
@@ -31507,6 +31605,56 @@
 
 	})(window, window.angular);
 
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(2);
+
+	describe('resource service', function() {
+	  beforeEach(angular.mock.module('phoneBookApp'));
+
+	  var ResourceService;
+	  var $httpBackend;
+	  var notesResource;
+	  beforeEach(angular.mock.inject(function(Resource, _$httpBackend_) {
+	    ResourceService = Resource;
+	    $httpBackend = _$httpBackend_;
+	  }));
+
+	  afterEach(function() {
+	    $httpBackend.verifyNoOutstandingExpectation();
+	    $httpBackend.verifyNoOutstandingRequest();
+	  });
+
+	  it('should make a get requets', function() {
+	    $httpBackend.expectGET('/api/person').respond(200, [{record: 'Roman'}]);
+	    ResourceService.getAll(function(err, data) {
+	      expect(err).toBe(null);
+	      expect(Array.isArray(data.data)).toBe(true);
+	    });
+	    $httpBackend.flush();
+	  });
+
+	  it('should post a record', function() {
+	    $httpBackend.expectPOST('/api/person', {name: 'Andrew', phoneNumber: 123}).respond(200, {_id: 1, msg: 'created'});
+	    ResourceService.create({name: 'Andrew', phoneNumber: 123}, function(err, data) {
+	      expect(err).toBe(null);
+	      expect(data.data.msg).toBe('created');
+	    });
+	    $httpBackend.flush();
+	  });
+
+	  it('should be able to delete a record', function() {
+	    $httpBackend.expectDELETE('/api/person/123').respond(200, {_id: 1, msg: 'deleted'});
+	    ResourceService.delete({_id: 123}, function(err, data) {
+	      expect(err).toBe(null);
+	      expect(data.data.msg).toBe('deleted');
+	    });
+	    $httpBackend.flush();
+	  });
+	});
 
 /***/ }
 /******/ ]);

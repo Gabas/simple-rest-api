@@ -5,9 +5,8 @@ module.exports = function(app) {
     
     Resource.getAll = function(callback) {
       $http.get('/api/person')
-        .then(callback, function(res) {
-          console.log(res);
-        });
+        .then(handleSuccess(callback),
+         handleError(callback));
     };
 
     Resource.create = function(data, callback) {

@@ -6,7 +6,7 @@ module.exports = function(phoneBook) {
 
 
   $scope.getAll = function() {
-    Resource.getAll(function(res) {
+    Resource.getAll(function(err, res) {
       $scope.book = res.data;
     });
   };
