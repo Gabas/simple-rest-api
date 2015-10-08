@@ -27,3 +27,4 @@ coverage
 node_modules
 db
 build
+test/client/test_bundle.js
