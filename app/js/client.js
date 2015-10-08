@@ -4,3 +4,5 @@ require('angular/angular');
 var phoneBook = angular.module('phoneBookApp', []);
 
 require('./records/records')(phoneBook);
+require('./services/services')(phoneBook);
+require('./directives/directives')(phoneBook);

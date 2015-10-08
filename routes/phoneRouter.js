@@ -10,11 +10,11 @@ phoneBookRouter.post('/person', jsonParser, function(req, res) {
   newPerson.phoneNumber = req.body.phoneNumber;
   if(newPerson.name && newPerson.phoneNumber) {
     newPerson.save(function(err, data) {
-      if (err) errorHandler(err, res);
+      if (err) return errorHandler(err, res);
       res.json(data);
     });
   } else {
-    return errorHandler.standard('Input data is incorrect');
+    return errorHandler('Input data is incorrect', res);
   }
 });
 

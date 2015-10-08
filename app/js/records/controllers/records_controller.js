@@ -1,52 +1,40 @@
 module.exports = function(phoneBook) {
 
-  phoneBook.controller('mainController', 'Resource', ['$scope', '$http', function($scope, $http) {
-    var resource = Resource;
-    $scope.book = [];
+  phoneBook.controller('mainController', ['$scope', '$http', 'Resource', function($scope, $http, Resource) {
+    
+  $scope.book = [];
 
 
   $scope.getAll = function() {
-        resource.getAll(function(res) {
-          $scope.book = res.data;
-        });
-
-
-
-    // $http.get('/api/person')
-    // .then(function(res) {
-    //   $scope.book = res.data;
-    // }, function(res) {
-
-    // });
+    Resource.getAll(function(res) {
+      $scope.book = res.data;
+    });
   };
 
   $scope.create = function(record) {
-    $http.post('/api/person', record)
-      .then(function(res) {
-        $scope.book.push(record);
-        $scope.newRecord = {};
-        console.log(res);
-      }, function(res) {
-        $scope.newRecord = {};
-      });
+    $scope.book.push(record);
+    $scope.newRecord = {};
+    Resource.create(record, function(err, res) {
+      if (err) {
+        $scope.book.pop();
+        return console.log(err);
+      }
+      record._id = res.data._id;
+    });
   };
 
   $scope.delete = function(record) {
-    $http.delete('/api/person/' + record._id)
-      .then(function(res) {
-        $scope.book.splice($scope.book.indexOf(record), 1);
-      }, function(res) {
-
-      });
+    Resource.delete(record, function(err, res) {
+      if (err) return console.log(err);
+      $scope.book.splice($scope.book.indexOf(record), 1);
+    });
   };
 
   $scope.update = function(record) {
-    $http.put('/api/person/' + record._id, record)
-      .then(function(res) {
-        record.editing = false;
-      }, function(res) {
-
-      });
+    Resource.update(record, function(err, res) {
+      if (err) return console.log(err);
+      record.editing = false;
+    });
   };
 
   $scope.edit = function(record) {
